@@ -1,0 +1,136 @@
+Check results
+=============
+
+E401:1:10:multiple imports on one line
+E303:29:1:too many blank lines (3)
+E303:42:1:too many blank lines (3)
+E261:44:76:at least two spaces before inline comment
+E501:44:80:line too long (96 > 79 characters)
+E501:47:80:line too long (89 > 79 characters)
+E302:52:1:expected 2 blank lines, found 1
+E265:53:5:block comment should start with '# '
+E302:61:1:expected 2 blank lines, found 1
+E225:78:22:missing whitespace around operator
+E265:97:9:block comment should start with '# '
+E225:101:19:missing whitespace around operator
+E265:107:5:block comment should start with '# '
+E265:108:5:block comment should start with '# '
+E265:109:5:block comment should start with '# '
+E265:111:5:block comment should start with '# '
+E265:112:5:block comment should start with '# '
+W292:112:25:no newline at end of file
+
+Code
+=============
+import os, sys, socket, struct
+import requests
+
+ICMP_ECHO_REQUEST = 8
+
+
+def checksum(source_string):
+    sum = 0
+    countTo = (len(source_string) / 2) * 2
+    count = 0
+    while count < countTo:
+        thisVal = source_string[count + 1] * 256 + source_string[count]
+        sum = sum + thisVal
+        sum = sum & 0xffffffff
+        count = count + 2
+    if countTo < len(source_string):
+        sum = sum + ord(source_string[len(source_string) - 1])
+        sum = sum & 0xffffffff
+    sum = (sum >> 16) + (sum & 0xffff)
+    sum = sum + (sum >> 16)
+    answer = ~sum
+    answer = answer & 0xffff
+    answer = answer >> 8 | (answer << 8 & 0xff00)
+
+    return answer
+
+
+
+def recv_icmp(my_socket, timeout):
+    try:
+        while True:
+            my_socket.settimeout(timeout)
+            data = my_socket.recvfrom(1508)
+            if (data):
+                break
+    except socket.timeout:
+        return None
+    return data
+
+
+
+def send_one_icmp(my_socket, dest_addr, ID, TTL):
+    my_checksum = 0
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, my_checksum, ID, 1)# 1 - sequence number
+    data = bytearray(64)
+    my_checksum = checksum(header + data)
+    header = struct.pack("bbHHh", ICMP_ECHO_REQUEST, 0, socket.htons(my_checksum), ID, 1)
+    packet = header + data
+    my_socket.setsockopt(socket.SOL_IP, socket.IP_TTL, TTL)
+    my_socket.sendto(packet, (dest_addr, 1))
+
+def get_info(IP_address):
+    #print("hhhhh")
+    country = requests.get('https://ipapi.co/'+IP_address+'/country_name/')
+    asn = requests.get('https://ipapi.co/' + IP_address + '/asn/')
+    org = requests.get('https://ipapi.co/' + IP_address + '/org/')
+    print("country: "+country.text)
+    print("as: "+asn.text)
+    print("organization: "+org.text)
+
+def main(dest_addr):
+    icmp = socket.getprotobyname("icmp")
+    try:
+        dest_addr = socket.gethostbyname(dest_addr)
+    except socket.gaierror:
+        print("address not found")
+        return
+    try:
+        send_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
+        recv_socket = socket.socket(socket.AF_INET, socket.SOCK_RAW, icmp)
+        recv_socket.bind(("", 33434))
+    except socket.error:
+        print("SocketError")
+        return
+    my_ID = os.getpid() & 0xFFFF
+    TTLcounter = 1
+    isSuccessful = False
+    while (TTLcounter<30):
+        for i in range(3):
+            send_one_icmp(send_socket, dest_addr, my_ID, TTLcounter)
+            raw_data = recv_icmp(recv_socket, 10)
+            if(raw_data is None):
+                print("no connection... trying again")
+        if (raw_data is None):
+            print("ERROR")
+            break
+        temp_IP = raw_data[1][0]
+        try:
+            temp_host = socket.gethostbyaddr(temp_IP)[0]
+        except:
+            temp_host = ""
+        try:
+            get_info(temp_IP)
+        except:
+            continue
+        print(temp_IP, temp_host)
+        #get_info(temp_IP)
+        if (temp_IP == dest_addr):
+            isSuccessful = True
+            break
+        TTLcounter+=1
+    if (not isSuccessful):
+        print("route_not_found")
+
+
+if __name__ == '__main__':
+    #main("e1.ru")
+    #main("google.com")
+    #main("tni.mil.id")
+    main("119.82.240.125")
+    #main("a-test-url-taht-is-not-available.com")
+    #main("192.168.1.1")

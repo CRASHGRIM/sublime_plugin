@@ -1,0 +1,540 @@
+Check results
+=============
+
+E501:41:80:line too long (85 > 79 characters)
+E501:128:80:line too long (96 > 79 characters)
+E501:151:80:line too long (96 > 79 characters)
+E124:219:49:closing bracket does not match visual indentation
+E124:231:59:closing bracket does not match visual indentation
+E124:239:61:closing bracket does not match visual indentation
+E501:240:80:line too long (117 > 79 characters)
+E501:250:80:line too long (85 > 79 characters)
+E124:258:48:closing bracket does not match visual indentation
+E501:260:80:line too long (101 > 79 characters)
+E501:261:80:line too long (99 > 79 characters)
+E501:262:80:line too long (100 > 79 characters)
+E501:263:80:line too long (89 > 79 characters)
+E501:264:80:line too long (91 > 79 characters)
+E501:265:80:line too long (87 > 79 characters)
+E124:265:86:closing bracket does not match visual indentation
+E501:286:80:line too long (81 > 79 characters)
+E124:294:48:closing bracket does not match visual indentation
+E501:302:80:line too long (103 > 79 characters)
+E501:305:80:line too long (81 > 79 characters)
+E501:306:80:line too long (99 > 79 characters)
+E501:307:80:line too long (88 > 79 characters)
+E501:308:80:line too long (152 > 79 characters)
+E501:381:80:line too long (81 > 79 characters)
+E115:406:21:expected an indented block (comment)
+E124:412:57:closing bracket does not match visual indentation
+E501:426:80:line too long (81 > 79 characters)
+E501:427:80:line too long (91 > 79 characters)
+E501:467:80:line too long (107 > 79 characters)
+E251:504:15:unexpected spaces around keyword / parameter equals
+
+Code
+=============
+import datetime
+import socket
+from threading import Thread
+SERIALIZE_DELIMETER = "_"
+SERIALIZE_DELIMETER_PARTS = "|"
+FORWARDER_IP = "212.193.163.6"
+# FORWARDER_IP = "8.8.8.8"
+SERVER_CACHE = {}
+SERVER_CACHE_PTR = {}
+SERVER_CACHE_SERIALIZED = "normal_cache.txt"
+SERVER_CACHE_PTR_SERIALIZED = "reversed_cache.txt"
+SERVER_CACHE_TTL = 300000
+EXIT_FLAG = False
+
+
+class Resourse_note:
+
+    def __init__(self,
+                 name,
+                 packet_type,
+                 cls,
+                 TTL=SERVER_CACHE_TTL,
+                 data=[],
+                 NS=[]):
+        self.name = name
+        self.packet_type = packet_type
+        self.cls = cls
+        self.TTL = Get_system_time() + TTL  # измеряем время по NTP
+        self.data = data
+        self.NS = NS
+
+    def to_bin(self):
+        bin_data = b""
+        bin_data += code_DNS_domain(self.name)
+        if(self.packet_type == 12):
+            bin_data += (12).to_bytes(2, byteorder='big')  # Answer
+        else:
+            bin_data += (1).to_bytes(2, byteorder='big')
+        bin_data += (1).to_bytes(2, byteorder='big')  # IN
+        bin_data += (SERVER_CACHE_TTL).to_bytes(4, byteorder='big')  # TTL
+        if(self.packet_type == 1):  # здесь мы узнаем что лежит в data: IP или Domain
+            self_data = IP_to_binary(self.data[0])
+        if(self.packet_type == 12):
+            self_data = code_DNS_domain_with_length(self.data[0])
+        bin_data += len(self_data).to_bytes(2, byteorder='big')
+        bin_data += self_data
+        return bin_data
+
+    def serialize(self):
+        out = ""
+        out += self.name
+        out += SERIALIZE_DELIMETER_PARTS
+        out += str(self.TTL)
+        out += SERIALIZE_DELIMETER_PARTS
+        for j in self.data:
+            out += str(j)
+            out += SERIALIZE_DELIMETER
+        if(len(self.data) > 0):
+            out = out[: -1]
+        out += SERIALIZE_DELIMETER_PARTS
+        for i in self.NS:
+            out += i
+            out += SERIALIZE_DELIMETER
+        if(len(self.NS) > 0):
+            out = out[: -1]
+        return out
+
+
+def code_DNS_domain(domain):
+    dom_list = domain.split(".")
+    out = b""
+    for i in dom_list:
+        if(len(i) == 0):
+            continue
+        out += len(i).to_bytes(1, byteorder='big')
+        out += i.encode("utf -8")
+    out += b"\x00"
+    return out
+
+
+def code_DNS_domain_with_length(domain):
+    out = code_DNS_domain(domain)
+    return out
+
+
+def binary_IP_to_str(bin_IP):
+    out = ""
+    for i in bin_IP:
+        out += str(int(i))
+        out += "."
+    out = out[: -1]  # убрали точку
+    return out
+
+
+def IP_to_binary(IP):
+    print(IP)
+    out = b""
+    octs = IP.split(".")
+    for i in octs:
+        out += int(i).to_bytes(1, byteorder='big')
+    print(out)
+    return out
+
+
+def reverse_IP(IP):
+    out = ""
+    octs = IP.split(".")
+    octs.reverse()
+    for i in octs:
+        out += i
+        out += "."
+    out = out[: -1]  # убрали точку
+    return out
+
+
+def get_full_domain_name(raw_data, index):
+    bitCount = index
+    domain_fullname = ""
+    while(True):
+        domain_len = raw_data[bitCount]
+        if(domain_len == 0):
+            bitCount += 1
+            break
+        bitCount += 1
+        if(domain_len > 63):
+            domain_len = domain_len * 256 + raw_data[bitCount]
+            bitCount += 1
+            domain_len -= 49152  # номер байта с начала всего пакета (вычли первые две единички)
+            domain = get_full_domain_name(raw_data, domain_len)[0]
+            domain_fullname += domain
+            break
+        else:
+            domain = raw_data[bitCount:bitCount + domain_len].decode('utf -8')
+            bitCount += domain_len
+            domain_fullname += domain
+            domain_fullname += "."
+    return domain_fullname, bitCount
+
+
+def get_full_domain_name_NS(raw_data, index, length):
+    bitCount = index
+    domain_fullname = ""
+    while(True):
+        domain_len = raw_data[bitCount]
+        if(bitCount == index + length):
+            break
+        bitCount += 1
+        if(domain_len > 63):
+            domain_len = domain_len * 256 + raw_data[bitCount]
+            bitCount += 1
+            domain_len -= 49152  # номер байта с начала всего пакета (вычли первые две единички)
+            domain = get_full_domain_name(raw_data, domain_len)[0]
+            domain_fullname += domain
+            break
+        else:
+            domain = raw_data[bitCount:bitCount + domain_len].decode('utf -8')
+            bitCount += domain_len
+            domain_fullname += domain
+            domain_fullname += "."
+    return domain_fullname, bitCount
+
+
+def bin_IP_to_record(raw_data):
+    out = ""
+    for i in raw_data:
+        out += str(i)
+        out += "."
+    out = out[: -1]
+    return out
+
+
+def parse_questions(raw_data):
+    question_count = raw_data[4:6]
+    question_count = int.from_bytes(question_count, byteorder='big')
+    bitCount = 12  # так как 12 - это шапка
+    resource_notes = []
+    for i in range(question_count):
+        domain_fullname, bitCount = get_full_domain_name(raw_data, bitCount)
+        question_type = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                       byteorder='big')
+        bitCount += 2
+        question_class = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                        byteorder='big')
+        bitCount += 2
+        if(question_type == 1 or question_type == 2 or question_type == 12):
+            resource_notes.append(Resourse_note(domain_fullname,
+                                                question_type,
+                                                question_class))
+            print("Question: ", domain_fullname, question_type, question_class)
+    return resource_notes, bitCount
+
+
+def parse_answers(raw_data, bitCount):
+    answers_count = raw_data[6:8]
+    answers_count = int.from_bytes(answers_count, byteorder='big')
+    resource_notes = []
+    for i in range(answers_count):
+        domain_fullname, bitCount = get_full_domain_name(raw_data, bitCount)
+        question_type = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                       byteorder='big')
+        bitCount += 2
+        question_class = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                        byteorder='big')
+        bitCount += 2
+        TTL = int.from_bytes(raw_data[bitCount:bitCount + 4], byteorder='big')
+        bitCount += 4
+        data_length = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                     byteorder='big')
+        bitCount += 2
+        if(question_type == 1):
+            data = raw_data[bitCount:bitCount + data_length]
+            data = bin_IP_to_record(data)
+            bitCount += data_length
+            resource_notes.append(Resourse_note(domain_fullname,
+                                                question_type,
+                                                question_class,
+                                                TTL,
+                                                [data,
+                                                ]))
+            print("answer: ",
+                  domain_fullname,
+                  question_type,
+                  question_class,
+                  TTL,
+                  data)
+            SERVER_CACHE[domain_fullname] = Resourse_note(domain_fullname,
+                                                          question_type,
+                                                          question_class,
+                                                          TTL,
+                                                          [data,
+                                                          ])
+            ptr_index = reverse_IP(data) + ".in -addr.arpa."
+            if(ptr_index not in SERVER_CACHE_PTR):
+                SERVER_CACHE_PTR[ptr_index] = Resourse_note(ptr_index,
+                                                            12,
+                                                            question_class,
+                                                            TTL,
+                                                            [domain_fullname,
+                                                            ])
+                SERVER_CACHE_PTR[ptr_index].data.append(domain_fullname)  # здесь в PTR в NS хранится дата но и ладно
+            else:
+                if(domain_fullname not in SERVER_CACHE_PTR[ptr_index].data):
+                    SERVER_CACHE_PTR[ptr_index].data.append(domain_fullname)
+        if(question_type == 12):
+            if(".in -addr.arpa." in domain_fullname):
+                domain_fullname = domain_fullname.replace(".in -addr.arpa.",
+                                                          "")
+            data_test = raw_data[bitCount:bitCount + data_length]
+            print(data_test)
+            data, bitCount = get_full_domain_name_NS(raw_data, bitCount, data_length)
+            data = data[: -1]  # убрали точку
+            print("parsed", data)
+            SERVER_CACHE[data] = Resourse_note(data,
+                                               question_type,
+                                               question_class,
+                                               TTL,
+                                               [domain_fullname,
+                                               ])
+            if(domain_fullname + ".in -addr.arpa" not in SERVER_CACHE_PTR):
+                SERVER_CACHE_PTR[domain_fullname + ".in -addr.arpa"] = Resourse_note(domain_fullname,
+                                                                                     question_type,
+                                                                                     question_class,
+                                                                                     TTL,
+                                                                                     [data,
+                                                                                     ])
+    return resource_notes, bitCount
+
+
+def parse_authority(raw_data, bitCount):
+    authority_count = raw_data[8:10]
+    authority_count = int.from_bytes(authority_count, byteorder='big')
+    resource_notes_NS = []
+    for i in range(authority_count):
+        domain_fullname, bitCount = get_full_domain_name(raw_data, bitCount)
+        authority_type = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                        byteorder='big')
+        bitCount += 2
+        authority_class = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                         byteorder='big')
+        bitCount += 2
+        TTL = int.from_bytes(raw_data[bitCount:bitCount + 4], byteorder='big')
+        bitCount += 4
+        data_length = int.from_bytes(raw_data[bitCount:bitCount + 2],
+                                     byteorder='big')
+        bitCount += 2
+        data, bitCount = get_full_domain_name_NS(raw_data, bitCount, data_length)
+        if(domain_fullname in SERVER_CACHE):
+            SERVER_CACHE[domain_fullname].NS.append(data)
+        resource_notes_NS.append(Resourse_note(domain_fullname,
+                                               authority_type,
+                                               authority_class,
+                                               TTL,
+                                               [data,
+                                               ]))
+        print(domain_fullname, authority_type, authority_class, TTL, data)
+    return resource_notes_NS, bitCount
+
+
+def parse_packet(data):
+    request_id = data[:2]
+    resource_notes, question_end_index = parse_questions(data)
+    question_type = 12  # ToDo поковыряться с PTR, на данный момент у него отключен парсинг 3 и 4 части
+    if(len(resource_notes) > 0):
+        question_type = resource_notes[0].packet_type
+    resource_notes_2, answers_end_index = parse_answers(data, question_end_index)
+    if(question_type != 12 and answers_end_index < len(data)):  # проверка что есть authority часть
+        resource_notes_3, authority_end_index = parse_authority(data, answers_end_index)
+        resource_notes_4, additional_end_index = parse_answers(data, authority_end_index)  # здесь с PTR проблемы потому что в additional реверснутый IP
+    return resource_notes_2
+
+
+def create_normal_answer_packet(id, answers, raw_question):
+    out = b""
+    out += id
+    out += (33024).to_bytes(2, byteorder='big')  # flags
+    out += raw_question[4:6]  # question_count
+    out += (len(answers)).to_bytes(2, byteorder='big')  # answers_count
+    out += b"\x00\x00"  # NScount
+    out += b"\x00\x00"  # ARcount
+    out += raw_question[12:]
+    for i in answers:
+        out += i.to_bin()
+        print(i.to_bin())
+    return out
+
+
+def create_error_answer_packet(id, raw_question):
+    out = b""
+    out += id
+    out += (33026).to_bytes(2, byteorder='big')  # flags
+    out += raw_question[4:6]  # question_count
+    out += b"\x00\x00"  # answers_count
+    out += b"\x00\x00"  # NScount
+    out += b"\x00\x00"  # ARcount
+    out += raw_question[12:]
+    return out
+
+
+def serialize_cache():
+    normal_cache = open(SERVER_CACHE_SERIALIZED, 'w')
+    reversed_cache = open(SERVER_CACHE_PTR_SERIALIZED, 'w')
+    for i in SERVER_CACHE.values():
+        normal_cache.write(i.serialize() + "\n")
+    for i in SERVER_CACHE_PTR.values():
+        reversed_cache.write(i.serialize() + "\n")
+    normal_cache.close()
+    reversed_cache.close()
+
+
+def deserialize():
+    try:
+        normal_cache = open(SERVER_CACHE_SERIALIZED, 'r').read().splitlines()
+    except(IOError):
+        print("no cache found")
+        normal_cache = []
+        pass
+    try:
+        reversed_cache = open(SERVER_CACHE_PTR_SERIALIZED,
+                              'r').read().splitlines()
+    except(IOError):
+        print("no reversed cache found")
+        reversed_cache = []
+        pass
+    for i in normal_cache:
+        record = i.split(SERIALIZE_DELIMETER_PARTS)
+        if(int(record[1]) > Get_system_time()):
+            data = record[2].split(SERIALIZE_DELIMETER)
+            NS = record[3].split(SERIALIZE_DELIMETER)
+            SERVER_CACHE[record[0]] = Resourse_note(record[0],
+                                                    1,
+                                                    1,
+                                                    int(record[1]), data, NS)
+    for i in reversed_cache:
+        record = i.split(SERIALIZE_DELIMETER_PARTS)
+        if(int(record[1]) > Get_system_time()):
+            data = record[2].split(SERIALIZE_DELIMETER)
+            NS = record[3].split(SERIALIZE_DELIMETER)
+            SERVER_CACHE_PTR[record[0]] = Resourse_note(record[0],
+                                                        12,
+                                                        1,
+                                                        int(record[1]), data, NS)
+
+
+def Get_system_time():
+    diff = datetime.datetime.utcnow() - datetime.datetime(1900, 1, 1, 0, 0, 0)
+    timestamp = diff.days * 24 * 60 * 60 + diff.seconds
+    return timestamp
+
+
+def find_records_in_cache(questions):
+    cache_answ = []
+    for i in questions:
+        if(i.packet_type == 1):  # A - record
+            if(i.name in SERVER_CACHE):
+                if(SERVER_CACHE.get(i.name).TTL < Get_system_time()):
+                    SERVER_CACHE.pop(i.name)
+                else:
+                    cache_answ.append(SERVER_CACHE.get(i.name))
+        if(i.packet_type == 12):  # PTR - record
+            if(i.name in SERVER_CACHE_PTR):
+                if(SERVER_CACHE_PTR.get(i.name).TTL < Get_system_time()):
+                    SERVER_CACHE_PTR.pop(i.name)
+                else:
+                    record = SERVER_CACHE_PTR.get(i.name)
+                    for dom in record.data:
+                    # print("DOMAIN: ", dom)
+                        cache_answ.append(Resourse_note(record.name,
+                                                        12,
+                                                        1,
+                                                        SERVER_CACHE_TTL,
+                                                        [dom,
+                                                        ]))
+                    # cache_answ.append(SERVER_CACHE_PTR.get(i.name))
+        if(i.packet_type == 2):  # NS - record
+            if(i.name in SERVER_CACHE):
+                if(SERVER_CACHE.get(i.name).TTL < Get_system_time()):
+                    SERVER_CACHE.pop(i.name)
+                else:
+                    if(len(SERVER_CACHE.get(i.name).NS) != 0):
+                        record = SERVER_CACHE.get(i.name)
+                        for ns in record.NS:
+                            if(ns in SERVER_CACHE):
+                                cache_answ.append(Resourse_note(ns,
+                                                                1,
+                                                                1,
+                                                                SERVER_CACHE_TTL,
+                                                                SERVER_CACHE.get(ns).data))
+                                # break
+    return cache_answ
+
+
+def run_server():
+    deserialize()
+    clientSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        clientSock.bind(('', 53))
+    except(socket.error):
+        print("error in socket binding")
+        return
+    clientSock.settimeout(2)
+    serverSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    serverSock.settimeout(4)
+    print('server is running')
+    while True:
+        try:
+            data, addr = clientSock.recvfrom(1024)
+        except(socket.timeout):
+            if(EXIT_FLAG):
+                print("server_shutdown")
+                serialize_cache()
+                clientSock.close()
+                serverSock.close()
+                break
+            else:
+                continue
+        except(ConnectionResetError):
+            print("client_disconnected")
+            continue
+        print(" -------------------------------")
+        request_id = data[:2]
+        question_count = int.from_bytes(data[4:6], byteorder='big')
+        questions, bitCount = parse_questions(data)
+        print("questions_count: ", len(questions))
+        cache_answ = find_records_in_cache(questions)
+        for i in cache_answ:
+            print("from cache: ", i.name, " : ", i.data)
+        if(len(cache_answ) >= question_count):  # здесь мы проверяем что смогли вытащить из кэша все ответы
+            print("No_server_request")
+            answ_packet = create_normal_answer_packet(request_id,
+                                                      cache_answ,
+                                                      data)
+        else:
+            try:
+                serverSock.sendto(data, (FORWARDER_IP, 53))
+                print("sent_to_server")
+                s_data, s_addr = serverSock.recvfrom(2048)
+                answers = parse_packet(s_data)
+                answ_packet = create_normal_answer_packet(request_id,
+                                                          answers,
+                                                          data)
+                # print(answ_packet)
+            except(socket.timeout):
+                answ_packet = create_error_answer_packet(request_id, data)
+                print("server_unreachable_error")
+        try:
+            clientSock.sendto(answ_packet, addr)
+        except(socket.error):
+            print("error in sending answer")
+
+
+def console_thread():
+    global SERVER_CACHE
+    global SERVER_CACHE_PTR
+    input_var = ""
+    while(input_var != "exit"):
+        input_var = input("Enter command: ")
+        if(input_var == "clean"):
+            SERVER_CACHE = {}
+            SERVER_CACHE_PTR = {}
+            print("cache deleted")
+    global EXIT_FLAG
+    EXIT_FLAG = True
+Thread(target=run_server).start()
+Thread(target= console_thread()).start()

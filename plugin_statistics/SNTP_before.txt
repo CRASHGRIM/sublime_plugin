@@ -1,0 +1,92 @@
+Check results
+=============
+
+E501:7:80:line too long (85 > 79 characters)
+E302:11:1:expected 2 blank lines, found 1
+E262:13:34:inline comment should start with '# '
+E265:16:9:block comment should start with '# '
+E501:21:80:line too long (238 > 79 characters)
+E261:21:174:at least two spaces before inline comment
+E302:26:1:expected 2 blank lines, found 1
+E302:31:1:expected 2 blank lines, found 1
+E302:38:1:expected 2 blank lines, found 1
+E228:41:28:missing whitespace around modulo operator
+E302:46:1:expected 2 blank lines, found 1
+E225:52:14:missing whitespace around operator
+E225:53:14:missing whitespace around operator
+E225:54:14:missing whitespace around operator
+E225:55:14:missing whitespace around operator
+E302:58:1:expected 2 blank lines, found 1
+W292:69:7:no newline at end of file
+
+Code
+=============
+import socket
+import datetime
+
+import math
+
+TIME_SHIFT = 20
+PREPARED_PACKET_CONSTANT_FIELDS = b'\x1c\x02\x00\xe9\x00\x00\x1f\x7d\x00\x00\x04\x01'
+PREPARED_PACKET_SOURCE = b'\x80\x8a\x8d\xac'
+PREPARED_PACKET_REFRESH_TIME = b'\xe0\x27\xcc\x89\xfe\x38\x0d\x8d'
+
+def Get_Time():
+    realSock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    data = b'\x1b' + 47 * b'\0'  #пустой sntp запрос
+    try:
+        realSock.sendto(data, ('time.windows.com', 123))
+        #realSock.sendto(data, ('nonameServer.com', 123))
+        realSock.settimeout(5)
+        realTime = realSock.recv(2048)
+    except:
+        time = Parse_longint_to_bytes(Get_system_time())
+        return PREPARED_PACKET_CONSTANT_FIELDS+PREPARED_PACKET_SOURCE+PREPARED_PACKET_REFRESH_TIME+time+b'\x00\x00\x00\x00'+time+b'\x00\x00\x00\x00'+time+b'\x00\x00\x00\x00'# здесь надо возвращать правдоподобный пакет с системным временем
+        realSock.close()
+    realSock.close()
+    return realTime
+
+def Get_system_time():
+    diff = datetime.datetime.utcnow() - datetime.datetime(1900, 1, 1, 0, 0, 0)
+    timestamp = diff.days * 24 * 60 * 60 + diff.seconds
+    return timestamp
+
+def Parse_NTP_Time(arr):
+    return (arr[3] & 0xFF |
+            (arr[2] & 0xFF) << 8 |
+            (arr[1] & 0xFF) << 16 |
+            (arr[0] & 0xFF) << 24)
+    return s
+
+def Parse_longint_to_bytes(input):
+    output = bytearray()
+    for i in range(4):
+        output.append(input%256)
+        input = math.floor(input/256)
+    output.reverse()
+    return output
+
+def Prepare_Fake_Packet(realPacket):
+    outPacket = realPacket[0:32]
+    getTime = Parse_NTP_Time(realPacket[32:36])
+    sendTime = Parse_NTP_Time(realPacket[40:44])
+    getTime += TIME_SHIFT
+    sendTime += TIME_SHIFT
+    outPacket+=Parse_longint_to_bytes(getTime)
+    outPacket+= realPacket[36:40]
+    outPacket+=Parse_longint_to_bytes(sendTime)
+    outPacket+=realPacket[44:]
+    return outPacket
+
+def main():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('', 123))
+    while True:
+        data = sock.recvfrom(2048)
+        realTime = Get_Time()
+        fakeTime = Prepare_Fake_Packet(realTime)
+        sock.sendto(fakeTime, data[1])
+    sock.close()
+
+
+main()

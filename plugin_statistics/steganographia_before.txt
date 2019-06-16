@@ -1,0 +1,564 @@
+Check results
+=============
+
+E302:4:1:expected 2 blank lines, found 1
+E261:31:64:at least two spaces before inline comment
+E501:31:80:line too long (105 > 79 characters)
+E261:32:44:at least two spaces before inline comment
+E501:32:80:line too long (85 > 79 characters)
+E261:34:31:at least two spaces before inline comment
+E251:37:59:unexpected spaces around keyword / parameter equals
+E261:37:66:at least two spaces before inline comment
+E501:37:80:line too long (126 > 79 characters)
+E501:54:80:line too long (85 > 79 characters)
+E501:62:80:line too long (124 > 79 characters)
+E501:63:80:line too long (118 > 79 characters)
+E501:64:80:line too long (110 > 79 characters)
+E501:66:80:line too long (92 > 79 characters)
+E501:67:80:line too long (178 > 79 characters)
+E501:69:80:line too long (131 > 79 characters)
+E302:71:1:expected 2 blank lines, found 1
+E225:72:21:missing whitespace around operator
+E501:73:80:line too long (95 > 79 characters)
+E303:104:1:too many blank lines (3)
+E501:114:80:line too long (88 > 79 characters)
+E261:128:20:at least two spaces before inline comment
+E261:130:18:at least two spaces before inline comment
+E501:132:80:line too long (88 > 79 characters)
+E501:135:80:line too long (81 > 79 characters)
+E201:137:34:whitespace after '('
+E501:137:80:line too long (83 > 79 characters)
+E501:138:80:line too long (83 > 79 characters)
+E501:140:80:line too long (107 > 79 characters)
+E501:144:80:line too long (91 > 79 characters)
+E225:146:69:missing whitespace around operator
+E202:146:72:whitespace before ')'
+E501:150:80:line too long (83 > 79 characters)
+E501:151:80:line too long (85 > 79 characters)
+E501:152:80:line too long (94 > 79 characters)
+E501:153:80:line too long (92 > 79 characters)
+E261:158:45:at least two spaces before inline comment
+E501:158:80:line too long (136 > 79 characters)
+E501:161:80:line too long (134 > 79 characters)
+E225:163:21:missing whitespace around operator
+E501:175:80:line too long (133 > 79 characters)
+E711:176:29:comparison to None should be 'if cond is not None:'
+E225:179:24:missing whitespace around operator
+E501:179:80:line too long (104 > 79 characters)
+E501:180:80:line too long (93 > 79 characters)
+E225:181:20:missing whitespace around operator
+E203:182:26:whitespace before ','
+E261:182:41:at least two spaces before inline comment
+E711:183:36:comparison to None should be 'if cond is not None:'
+E261:183:45:at least two spaces before inline comment
+E501:183:80:line too long (99 > 79 characters)
+E711:185:43:comparison to None should be 'if cond is not None:'
+E261:185:52:at least two spaces before inline comment
+E501:185:80:line too long (139 > 79 characters)
+E225:187:24:missing whitespace around operator
+E501:187:80:line too long (93 > 79 characters)
+E225:189:24:missing whitespace around operator
+E501:189:80:line too long (129 > 79 characters)
+E501:198:80:line too long (134 > 79 characters)
+E225:204:13:missing whitespace around operator
+E501:205:80:line too long (111 > 79 characters)
+E261:205:86:at least two spaces before inline comment
+E262:205:87:inline comment should start with '# '
+E501:207:80:line too long (105 > 79 characters)
+E225:208:19:missing whitespace around operator
+E225:221:23:missing whitespace around operator
+E251:226:62:unexpected spaces around keyword / parameter equals
+E225:227:27:missing whitespace around operator
+E265:230:17:block comment should start with '# '
+E225:237:29:missing whitespace around operator
+E225:238:27:missing whitespace around operator
+E251:241:58:unexpected spaces around keyword / parameter equals
+E225:242:23:missing whitespace around operator
+E501:260:80:line too long (134 > 79 characters)
+E501:269:80:line too long (81 > 79 characters)
+E501:281:80:line too long (187 > 79 characters)
+E261:281:137:at least two spaces before inline comment
+E225:306:17:missing whitespace around operator
+E501:307:80:line too long (156 > 79 characters)
+E261:307:87:at least two spaces before inline comment
+E202:308:28:whitespace before ']'
+E225:308:30:missing whitespace around operator
+E225:309:25:missing whitespace around operator
+E225:311:25:missing whitespace around operator
+E501:319:80:line too long (82 > 79 characters)
+E265:320:5:block comment should start with '# '
+E501:320:80:line too long (101 > 79 characters)
+E303:391:1:too many blank lines (4)
+E251:394:44:unexpected spaces around keyword / parameter equals
+E302:404:1:expected 2 blank lines, found 1
+E251:409:60:unexpected spaces around keyword / parameter equals
+E251:409:62:unexpected spaces around keyword / parameter equals
+E501:409:80:line too long (81 > 79 characters)
+E251:411:51:unexpected spaces around keyword / parameter equals
+E251:411:53:unexpected spaces around keyword / parameter equals
+E711:415:19:comparison to None should be 'if cond is None:'
+E711:419:28:comparison to None should be 'if cond is None:'
+E711:421:37:comparison to None should be 'if cond is None:'
+E225:423:41:missing whitespace around operator
+E225:425:42:missing whitespace around operator
+E501:431:80:line too long (82 > 79 characters)
+E225:433:34:missing whitespace around operator
+E711:433:34:comparison to None should be 'if cond is None:'
+E225:435:40:missing whitespace around operator
+E225:440:34:missing whitespace around operator
+E711:440:34:comparison to None should be 'if cond is None:'
+E225:442:40:missing whitespace around operator
+W292:450:11:no newline at end of file
+
+Code
+=============
+import math
+import argparse
+
+def GetBitmapInfoSize(image):
+    return int.from_bytes(image[14:17], byteorder='little')
+
+
+def GetBitCount16(image):
+    return int.from_bytes(image[24:25], byteorder='little')
+
+
+def GetBitCount32(image):
+    return int.from_bytes(image[28:29], byteorder='little')
+
+
+def GetLastTwoBits(input):
+    input = input.split('b')[1]
+    if (len(input) > 2):
+        return input[-2:]
+    if (len(input) == 2):
+        return input
+    if (len(input) < 2):
+        return '0' * (2 - len(input)) + input
+
+
+def MakeByteStringFromFiles(inputTexts):
+    inputString = bytes()
+    for text in inputTexts:
+        file = open(text, 'rb')
+        inputString += newFileMarker
+        inputString += (len(text)).to_bytes(1, byteorder='big') # 1 байт на хранение длины названия файла
+        inputString += text.encode('ascii')# храним название файла откуда берем текст
+        textFromFile = file.read()
+        for i in textFromFile:# записываем сам текст
+            inputString += i.to_bytes(1, byteorder='big')
+            if (i == int.from_bytes(newFileMarker, byteorder='big')):
+                inputString += (47).to_bytes(1, byteorder= 'big')# если в тексте был маркер нового файла пишем после него слэш
+        file.close
+    return inputString
+
+
+def MakeBinaryLetter(letter):
+    return '0' * (8-len(bin(letter)[2:])) + str(bin(letter)[2:])
+
+
+def MakeBinaryString(input):
+    output = ''
+    for i in range(len(input)):
+        output += MakeBinaryLetter(input[i])
+    return output
+
+
+def MakeCodedByte(inputByte, message):
+    return (int((inputByte & 252) | int(message, 2))).to_bytes(1, byteorder='little')
+
+
+def CheckSuitabilityOfInput(input):
+    if (input[0] != 66 or input[1] != 77):
+        raise TypeError('Wrong file format, usable only with BMP')
+
+
+# 1) на запись каждого символа сообщения необходимо 4 байта картинки + 8 байт картинки необходимы для записи длины сообщения
+# 2) на запись длины отведено 8 байт картинки, в каждый кодируется по 2 бита длины, 16 бит - максимальная длина = 2^14
+# 3) на запись хэшсуммы отведено 12 байт картинки: 2^16 символов * 256 максимальный вес символа в ascii = 2^24
+def CheckSuitabilityOfMessage24(message, image, offset):
+    if (len(message) > (len(image)-amountOfCodedPixelsLength24-checkSummLength24-offset)/4):
+        raise ValueError('too long message, use message shorter than', int((len(image)-offset-amountOfCodedPixelsLength24-checkSummLength24)/4), 'symbols or find bigger picture')
+    if (len(message) > 2**14):
+        raise ValueError('too long message, use message shorter than', int(len(message) > 2**14), 'symbols or find bigger picture')
+
+def CheckSuitabilityOfMessage8(message, image, offset):
+    if (len(message)> (len(image) - offset)/8):
+        raise ValueError('too long message, use message shorter than', (len(image) - offset)/8,
+                         'symbols or find bigger picture')
+
+
+def GetLengthOfCodedMessage24(image, offset):
+    lengthOfMessageBinary = ''
+    for i in range(amountOfCodedPixelsLength24):
+        lengthOfMessageBinary += GetLastTwoBits(str(bin(image[offset + i])))
+    amountOfCodedPixels = int(lengthOfMessageBinary, 2)
+    return amountOfCodedPixels
+
+
+def GetAmountOfCodedPixels8(image, offset):
+    amountOfCodedPixels = ''
+    for i in range(amountOfCodedPixelsLength):
+        if(image[i + offset] >= 128):
+            amountOfCodedPixels += '1'
+        else:
+            amountOfCodedPixels += '0'
+    amountOfCodedPixels = int(amountOfCodedPixels, 2)
+    return amountOfCodedPixels
+
+
+def GetBinaryStringFromCodedPicture(amountOfCodedPixels, image, offset):
+    outputBinary = ''
+    for j in range(amountOfCodedPixels):
+        outputBinary += GetLastTwoBits(str(bin(image[offset + j])))
+    return outputBinary
+
+
+
+def MakeCheckSumm(inputString):
+    summ = 0
+    for letter in inputString:
+        summ += letter
+    if (summ > 2**checkSummLength):
+        summ = summ % (2**checkSummLength)
+    return summ
+
+
+def MakeBinaryCheckSumm(inputSumm):
+    output = '0' * (checkSummLength - len(bin(inputSumm)[2:])) + str(bin(inputSumm)[2:])
+    return output
+
+
+def GetCheckSumm24(image, offset):
+    offset = offset + amountOfCodedPixelsLength24
+    checkSummBinary = ''
+    for i in range(checkSummLength24):
+        checkSummBinary += GetLastTwoBits(str(bin(image[offset + i])))
+    checkSumm = int(checkSummBinary, 2)
+    return checkSumm
+
+
+def MakeSwapDict(palette, numberOfColors):
+    pixelArray = [] # здесь хранится матрица в которой содержатся дельты цветов
+    listOfColors = []
+    swapDict = {} # слева цвет который меняем, справа - на который
+    for i in range(numberOfColors):
+        listOfColors.append((palette[i * 4 + 2], palette[i * 4 + 1], palette[i * 4], i))
+    for i in range(numberOfColors):
+        pixelArray.append([])
+    for i in range(numberOfColors):  # заполнение матрицы по определенной формуле
+        for j in range(numberOfColors):
+            pixelArray[i].append( 30 * (palette[i * 4 + 2]-palette[j * 4 + 2])**2 +
+                                  59 * (palette[i * 4 + 1]-palette[j * 4 + 1])**2 +
+                                  11 * (palette[i * 4]-palette[j * 4])**2)
+    for j in range(math.floor(numberOfColors / 2)):  # здесь ищутся похожие цвета и записываются в swapdict
+        minDelta = 10000000
+        minDeltaIndex1 = 0
+        minDeltaIndex2 = 0
+        for i in range(len(pixelArray)):     # здесь ищется наименьшая дельта между цветами
+            for j in range(len(pixelArray[0])):
+                if (pixelArray[i][j] < minDelta and pixelArray[i][j]!=0 ):
+                    minDelta = pixelArray[i][j]
+                    minDeltaIndex1 = j
+                    minDeltaIndex2 = i
+        swapDict[listOfColors[minDeltaIndex1][3]] = listOfColors[minDeltaIndex2][3]
+        listOfColors.pop(minDeltaIndex1)   # удаляем цвет под замену из списка цветов
+        pixelArray.pop(minDeltaIndex1)    # удаляем из матрицы заменяемый цвет по горизонтали?
+        for i in range(len(pixelArray)):  # удаляем из матрицы заменяемый цвет по вертикали?
+            pixelArray[i].pop(minDeltaIndex1)
+    return swapDict
+
+
+def MakeShiftDict(swapDict, numberOfColors):# когда мы удалим цвета из палитры остальные цвета сместятся, это смещение для каждого цвета
+    shiftDict = {}
+    shift = 0
+    for i in range(numberOfColors):  # если цвет заменяется то мы удаляем его из палитры а значит все последующие смещаются на 1 влево
+        if (i in swapDict):
+            shift +=1
+        else:
+            shiftDict[i] = shift
+    return shiftDict
+
+
+def CutPalette(image, bitCount):
+    palette = image[54:54+(2**bitCount)*4]
+    outputImage = image[0:54]
+    offset = int.from_bytes(image[10:13], byteorder='little')
+    swapDict = MakeSwapDict(palette, 2**bitCount)
+    shiftDict = MakeShiftDict(swapDict, 2**bitCount)
+    for i in range(2**bitCount):   # здесь те цвета которые надо заменить удаляются из палитры и далее дописывается 128 пустых цветов
+        if (swapDict.get(i) != None):   # если цвет меняется то пропускаем его
+            continue
+        else:
+            outputImage+=(image[i*4+54:i*4+4+54])    # иначе впихиваем тот который на начальной картинке
+    for i in range(2**(bitCount-1)):   # это дублирование цветов (вместо тех которые удалили)
+        outputImage+=(outputImage[i*4+54:i*4+4+54])
+    for j in range(offset , len(image)): # меняем пиксели в самой картинке
+        if (swapDict.get(image[j]) != None): # если в swapdict есть такой цвет то пишем цвет оттуда
+            tempcolor = image[j]
+            while(swapDict.get(tempcolor) != None):# здесь ищем цвет на который заменяется(бывают случаи 1цвет->2цвет->3цвет) поэтому while
+                tempcolor = swapDict[tempcolor]
+            outputImage+=((tempcolor - shiftDict[tempcolor]).to_bytes(1, byteorder='little'))
+        else:
+            outputImage+=((image[j]-shiftDict[image[j]]).to_bytes(1, byteorder='little'))  # иначе просто пишем цвет который есть
+    return outputImage
+
+
+def MakeCodedPicture8(text, imageIn, imageOut):
+    checkSumm = MakeCheckSumm(text)
+    binaryCheckSumm = MakeBinaryCheckSumm(checkSumm)
+    binaryText = MakeBinaryString(text)
+    amountOfPixelsToCode = (len(binaryText))
+    amountOfCodedPixelsBinary = '0' * (amountOfCodedPixelsLength - len(bin(amountOfPixelsToCode)[2:])) + bin(amountOfPixelsToCode)[2:]
+    binaryText = amountOfCodedPixelsBinary + binaryCheckSumm + binaryText
+    offset = int.from_bytes(imageIn[10:13], byteorder='little')
+    bitCounter = offset
+    imageOut.write(imageIn[:bitCounter])
+    for i in binaryText:
+        if(i=='1'):
+            imageOut.write((imageIn[bitCounter]+128).to_bytes(1, byteorder='little')) #  цвет из второй палитры
+        else:
+            imageOut.write(imageIn[bitCounter].to_bytes(1, byteorder='little'))  # цвет из первой палитры
+        bitCounter+=1
+    imageOut.write(imageIn[bitCounter:])
+
+
+def WriteDecodedBinaryToFiles(input, inputCheckSumm):
+    realCheckSumm = 0
+    bitCounter = 0
+    output = open('outText.txt', 'wb')
+    while (bitCounter < int(len(input)/8)):
+        binaryLetter = input[8 * bitCounter: 8 * bitCounter + 8]
+        intLetter = int(binaryLetter, 2)
+        realCheckSumm += intLetter
+        if (intLetter == 23):
+            bitCounter+=1
+            binaryLetter = input[8 * bitCounter: 8 * bitCounter + 8]
+            nextIntLetter = int(binaryLetter, 2)
+            realCheckSumm += nextIntLetter
+            if (nextIntLetter == 47):
+                output.write(intLetter.to_bytes(1, byteorder= 'big'))
+                bitCounter+=1
+            else:
+                nameLength = int(input[8 * bitCounter: 8 * bitCounter + 8], 2)
+                #realCheckSumm += nameLength
+                fileName = ""
+                for j in range(nameLength):
+                    bitCounter += 1
+                    binaryLetter = input[8 * bitCounter: 8 * bitCounter + 8]
+                    intLetter = int(binaryLetter, 2)
+                    realCheckSumm += intLetter
+                    fileName+=(chr(intLetter))
+                bitCounter+=1
+                output = open("decrypted_"+fileName, 'wb')
+        else:
+            output.write(intLetter.to_bytes(1, byteorder= 'big'))
+            bitCounter+=1
+    if (realCheckSumm > 2**checkSummLength):
+        realCheckSumm = realCheckSumm % (2**checkSummLength)
+    print(inputCheckSumm, realCheckSumm)
+    if (inputCheckSumm == realCheckSumm):
+        print('decoding successful')
+    else:
+        print('error in decoding')
+
+
+def EncodePicure24(inputPicture, inputTexts, outputFileName):
+    image = open(inputPicture, 'rb').read()
+    new_image = open(outputFileName, 'wb')
+    inputString = MakeByteStringFromFiles(inputTexts)
+    CheckSuitabilityOfInput(image)
+    offset = int.from_bytes(image[10:13], byteorder='little')
+    CheckSuitabilityOfMessage24(inputString, image, offset)
+    amountOfPixelsToCode = (len(inputString) * 4)
+    amountOfCodedPixelsBinary = '0' * (amountOfCodedPixelsLength - len(bin(amountOfPixelsToCode)[2:])) + bin(amountOfPixelsToCode)[2:]
+    checkSumm = MakeCheckSumm(inputString)
+    binaryCheckSumm = MakeBinaryCheckSumm(checkSumm)
+    bitCounter = 0
+    inputBinary = MakeBinaryString(inputString)
+    new_image.write(image[0:offset])
+    inputBinary = amountOfCodedPixelsBinary + binaryCheckSumm + inputBinary
+    bitCounter += offset
+    for i in range(int(len(inputBinary) / 2)):
+        new_image.write(MakeCodedByte(image[bitCounter], inputBinary[i*2:i*2+2]))
+        bitCounter += 1
+    new_image.write(image[bitCounter:])
+    new_image.close()
+
+
+def DecodePicture24(inputPicture):
+    image = open(inputPicture, 'rb').read()
+    CheckSuitabilityOfInput(image)
+    offset = int.from_bytes(image[10:13], byteorder='little')
+    amountOfCodedPixels = GetLengthOfCodedMessage24(image, offset)
+    inputCheckSumm = GetCheckSumm24(image, offset)
+    outputBinary = GetBinaryStringFromCodedPicture(amountOfCodedPixels, image, offset + checkSummLength24 + amountOfCodedPixelsLength24) # 12 == длина хэшсуммы, 8 == длина длины сообщения
+    return (outputBinary, inputCheckSumm)
+
+
+def EncodePicture8(inputPicture, inputTexts, outputFileName):
+    image = open(inputPicture, 'rb').read()
+    outCodedImage = open(outputFileName, 'wb')
+    bitCount = 0
+    inputString = MakeByteStringFromFiles(inputTexts)
+    offset = int.from_bytes(image[10:13], byteorder='little')
+    CheckSuitabilityOfMessage8(inputString, image, offset)
+    bitMapInfoSize = GetBitmapInfoSize(image)
+    if (bitMapInfoSize == 12):
+        bitCount = GetBitCount16(image)
+    else:
+        bitCount = GetBitCount32(image)
+    cuttedImage = CutPalette(image, bitCount)
+    MakeCodedPicture8(inputString, cuttedImage, outCodedImage)
+    outCodedImage.close()
+
+
+def DecodePicture8(inputPicture):
+    image = open(inputPicture, 'rb').read()
+    offset = int.from_bytes(image[10:13], byteorder='little')
+    amountOfCodedPixels = GetAmountOfCodedPixels8(image, offset)
+    outputBinary=""
+    for i in range(amountOfCodedPixels + amountOfCodedPixelsLength + checkSummLength):# +16 это количество закодированных пикселей (возможно как то вынести)
+        if(image[i + offset ]>=128):
+            outputBinary+='1'
+        else:
+            outputBinary+='0'
+    checkSumm = ''
+    for i in range(24):
+        if (image[i + offset + amountOfCodedPixelsLength] >= 128):
+            checkSumm += '1'
+        else:
+            checkSumm += '0'
+    checkSumm = int(checkSumm, 2)
+    return (outputBinary[amountOfCodedPixelsLength + checkSummLength:], checkSumm)
+    #WriteDecodedBinaryToFiles(outputBinary[amountOfCodedPixelsLength + checkSummLength:], checkSumm)
+
+
+def EncodePicture(inputPicture, inputTexts, outputFileName):
+    image = open(inputPicture, 'rb').read()
+    bitMapInfoSize = GetBitmapInfoSize(image)
+    if (bitMapInfoSize == 12):
+        bitCount = GetBitCount16(image)
+    else:
+        bitCount = GetBitCount32(image)
+    if (bitCount == 8):
+        EncodePicture8(inputPicture, inputTexts, outputFileName)
+    else:
+        EncodePicure24(inputPicture, inputTexts, outputFileName)
+
+
+def DecodePicture(inputPicture):
+    image = open(inputPicture, 'rb').read()
+    outputBinary = ()
+    bitMapInfoSize = GetBitmapInfoSize(image)
+    if (bitMapInfoSize == 12):
+        bitCount = GetBitCount16(image)
+    else:
+        bitCount = GetBitCount32(image)
+    if (bitCount == 8):
+        outputBinary = DecodePicture8(inputPicture)
+    else:
+        outputBinary = DecodePicture24(inputPicture)
+    WriteDecodedBinaryToFiles(outputBinary[0], outputBinary[1])
+
+
+def FileListing(inputPicture):
+    image = open(inputPicture, 'rb').read()
+    outputBinary = ()
+    bitMapInfoSize = GetBitmapInfoSize(image)
+    if (bitMapInfoSize == 12):
+        bitCount = GetBitCount16(image)
+    else:
+        bitCount = GetBitCount32(image)
+    if (bitCount == 8):
+        outputBinary = DecodePicture8(inputPicture)
+    else:
+        outputBinary = DecodePicture24(inputPicture)
+
+    input = outputBinary[0]
+    bitCounter = 0
+    while (bitCounter < int(len(input) / 8)):
+        binaryLetter = input[8 * bitCounter: 8 * bitCounter + 8]
+        intLetter = int(binaryLetter, 2)
+        if (intLetter == 23):
+            bitCounter += 1
+            binaryLetter = input[8 * bitCounter: 8 * bitCounter + 8]
+            nextIntLetter = int(binaryLetter, 2)
+            if (nextIntLetter == 47):
+                bitCounter += 1
+            else:
+                nameLength = int(input[8 * bitCounter: 8 * bitCounter + 8], 2)
+                fileName = ""
+                for j in range(nameLength):
+                    bitCounter += 1
+                    binaryLetter = input[8 * bitCounter: 8 * bitCounter + 8]
+                    intLetter = int(binaryLetter, 2)
+                    fileName += (chr(intLetter))
+                bitCounter += 1
+                print(fileName)
+        else:
+            bitCounter += 1
+
+
+
+
+# длины в битах полей в закодированном сообщении
+amountOfCodedPixelsLength = 16
+checkSummLength = 24
+newFileMarker = (23).to_bytes(1, byteorder= 'big')
+fileNameLentgh = 8
+# длина в закодированных RGB пикселях полей в закодированном сообщении
+amountOfCodedPixelsLength24 = 8
+checkSummLength24 = 12
+fileNameLentgh24 = 4
+# сколько бит информации хранится в одном пикселе изображения
+codedBitsinOnePixel_24 = 2
+codedBitsinOnePixel_8 = 1
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-ip", "--inputPicture", type=str,
+                        help="pictureToCode")
+    parser.add_argument("-op", "--outputPicture", type=str,
+                        help="nameForCodedPicture", default = 'codedPicture.bmp')
+    parser.add_argument("-t", "--texts", type=str,
+                        help="textsToWrite", nargs = "+")
+    parser.add_argument("-m", "--mode", type=str,
+                        help="encode, decode or listing mode")
+    args = parser.parse_args()
+    if (args.mode == None):
+        print("you must select mode (type --help)")
+    else:
+        if (args.mode == 'encode'):
+            if (args.texts == None):
+                print("no texts to code, type --help")
+            elif (args.inputPicture == None):
+                print("no image to encode")
+            elif (args.inputPicture[-4:]!='.bmp'):
+                print("wrong input picture, type --help")
+            elif (args.outputPicture[-4:]!='.bmp'):
+                print("wrong output picture, type --help")
+            else:
+                textsToWrite = []
+                for i in args.texts:
+                    textsToWrite.append(i)
+                EncodePicture(args.inputPicture, textsToWrite, args.outputPicture)
+        elif (args.mode == 'decode'):
+            if (args.inputPicture==None):
+                print("no image to decode")
+            elif(args.inputPicture[-4:]!='.bmp'):
+                print("wrong input picture, type --help")
+            else:
+                DecodePicture(args.inputPicture)
+        elif (args.mode == 'listing'):
+            if (args.inputPicture==None):
+                print("no image to decode")
+            elif(args.inputPicture[-4:]!='.bmp'):
+                print("wrong input picture, type --help")
+            else:
+                FileListing(args.inputPicture)
+        else:
+            print("wrong mode, type --help")
+
+if __name__ == "__main__":
+    main()
